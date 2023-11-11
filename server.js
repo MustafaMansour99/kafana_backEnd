@@ -21,9 +21,10 @@ server.delete("/deleteuser/:id", deleteuserHandler);
 server.put("/updateuser/:id", updateuserHandler);
 server.post("/addaccount", addaccountHandler);
 server.get("/getaccount", getaccountHandler);
-server.delete("/deleteaccount/:id",deleteaccountHandler)
-server.put("/updateaccount/:id",updateaccountHandler)
-
+server.delete("/deleteaccount/:id", deleteaccountHandler);
+server.put("/updateaccount/:id", updateaccountHandler);
+server.get("/getuserid/:id", getuserbyidHandler);
+server.get("/getaccountid/:id", getaccountbyidHandler);
 
 // functions
 function addUserHandler(req, res) {
@@ -37,6 +38,16 @@ function addUserHandler(req, res) {
     .catch((error) => {
       res.status(500).send(error);
     });
+}
+function getuserbyidHandler(req, res) {
+  const id = req.params.id;
+  const sql = `SELECT * FROM user1 where id=${id}`;
+  client
+    .query(sql)
+    .then((result) => {
+      res.send(result.rows);
+    })
+    .catch((err) => console.log(err));
 }
 
 function getUserHandler(req, res) {
@@ -66,63 +77,64 @@ function updateuserHandler(req, res) {
   const id = req.params.id;
   const data = req.body;
   const sql = `UPDATE user1 SET Username='${data.Username}' , Email='${data.Email}', First_name='${data.First_Name}',
-  Last_name='${data.Last_Name}'WHERE id = ${id} RETURNING *;`;
-        client.query(sql)
-        .then((result) => {
-            // res.send(result.rows);
-            const sql = `SELECT * FROM user1`;
-            client.query(sql)
-            .then((data) => {
-                res.send(data.rows);
-              })
-              .catch((error) => {
-                res.status(500).send(error);
-              });
-        })
-        .catch((error) => {
-            errorHandler(error, req, res);
-        });
-    }
-
+  Last_name='${data.Last_Name}' WHERE id = ${id} RETURNING *;`;
+  client.query(sql).then((result) => {
+    res.send(result.rows);
+  });
+}
+function getaccountbyidHandler(req, res) {
+    const id = req.params.id;
+    const sql = `SELECT * FROM Account where id=${id}`;
+    client
+      .query(sql)
+      .then((result) => {
+        res.send(result.rows);
+      })
+      .catch((err) => console.log(err));
+  }
 function addaccountHandler(req, res) {
-        const cadres = req.body;
-        let sql = `INSERT INTO Account(User_ID,Server_DateTime,DateTime_UTC,Update_DateTime_UTC,Account_Number,Balance,Currency,Status) VALUES ('${cadres.User_ID}','${cadres.Server_DateTime}','${cadres.DateTime_UTC}','${cadres.Update_DateTime_UTC}','${cadres.Account_Number}','${cadres.Balance}','${cadres.Currency}','${cadres.Status}') RETURNING *;`;
-        client
-          .query(sql)
-          .then((data) => {
-            res.send(data.rows);
-          })
-          .catch((error) => {
-            res.status(500).send(error);
-          });
-      }
-function getaccountHandler(req,res){
-    const sql =`SELECT * FROM Account`
-    client.query(sql)
-.then((data)=>{
-    res.send(data.rows)
-})
-.catch((err)=>console.log(err))
-}
-function deleteaccountHandler(req,res){
-    const id = req.params.id
-    console.log(id);
-    const sql = `DELETE FROM Account where id=${id} RETURNING *;`;
-    client.query(sql)
-    .then((data)=>{
-        res.send("success delete")
+  const cadres = req.body;
+  let sql = `INSERT INTO Account(User_ID,Server_DateTime,DateTime_UTC,Update_DateTime_UTC,Account_Number,Balance,Currency,Status) VALUES ('${cadres.User_ID}','${cadres.Server_DateTime}','${cadres.DateTime_UTC}','${cadres.Update_DateTime_UTC}','${cadres.Account_Number}','${cadres.Balance}','${cadres.Currency}','${cadres.Status}') RETURNING *;`;
+  client
+    .query(sql)
+    .then((data) => {
+      res.send(data.rows);
     })
-    .catch((err)=>console.log(err))
-}
-function updateaccountHandler(req,res){
-    const id=req.params.id
-    const data=req.body
-    const sql = `UPDATE Account SET User_ID='${data.User_ID}',Account_Number='${data.Account_Number}',Balance='${data.Balance}',Currency='${data.Currency}',Status='${data.Status}'WHERE id = ${id} RETURNING *;`;
-    client.query(sql)
-    .then((data)=>{
-        res.send(data.rows)
+    .catch((error) => {
+      res.status(500).send(error);
+    });
+}     
+
+function getaccountHandler(req, res) {
+  const sql = `SELECT * FROM Account`;
+  client
+    .query(sql)
+    .then((data) => {
+      res.send(data.rows);
     })
-    .catch((err)=>console.log(err))
+    .catch((err) => console.log(err));
+}
+function deleteaccountHandler(req, res) {
+  const id = req.params.id;
+  console.log(id);
+  const sql = `DELETE FROM Account where id=${id} RETURNING *;`;
+  client
+    .query(sql)
+    .then((data) => {
+      res.send("success delete");
+    })
+    .catch((err) => console.log(err));
+}
+function updateaccountHandler(req, res) {
+  const id = req.params.id;
+  const data = req.body;
+  const sql = `UPDATE Account SET User_ID='${data.User_ID}',Update_DateTime_UTC='${data.Update_DateTime_UTC}',Account_Number='${data.Account_Number}',Balance='${data.Balance}',Currency='${data.Currency}',Status='${data.Status}'WHERE id = ${id} RETURNING *;`;
+  client
+    .query(sql)
+    .then((data) => {
+      res.send(data.rows);
+    })
+    .catch((err) => console.log(err));
 }
 // connect with database
 client.connect().then(() => {
